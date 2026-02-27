@@ -1,0 +1,47 @@
+--[[
+    Hitbox Extender - Local Player Only
+    Uso: Destinado a loadstring para ganho de alcance em MPS/Combate.
+--]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- CONFIGURAÇÕES CUSTOMIZÁVEIS
+_G.HitboxSize = 6 -- Tamanho da sua hitbox (Padrão MPS: 5-8)
+_G.HitboxTransparency = 0.7 -- 0 = Visível, 1 = Invisível
+_G.HitboxColor = Color3.fromRGB(0, 255, 150) -- Cor (Verde Neon)
+
+local function applyHitbox()
+    local char = LocalPlayer.Character
+    if not char then return end
+    
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Busca ou Cria a Hitbox vinculada apenas a você
+    local myHitbox = hrp:FindFirstChild("LocalUserHitbox")
+    if not myHitbox then
+        myHitbox = Instance.new("Part")
+        myHitbox.Name = "LocalUserHitbox"
+        myHitbox.CanCollide = false
+        myHitbox.Massless = true -- Não altera o peso do seu pulo/movimento
+        myHitbox.Parent = hrp
+        
+        local weld = Instance.new("WeldConstraint")
+        weld.Part0 = hrp
+        weld.Part1 = myHitbox
+        weld.Parent = myHitbox
+    end
+
+    -- Atualiza Propriedades
+    myHitbox.Size = Vector3.new(_G.HitboxSize, _G.HitboxSize, _G.HitboxSize)
+    myHitbox.Transparency = _G.HitboxTransparency
+    myHitbox.Color = _G.HitboxColor
+    myHitbox.CFrame = hrp.CFrame
+end
+
+-- Mantém a hitbox ativa mesmo após morrer (Reset)
+RunService.RenderStepped:Connect(applyHitbox)
+
+print("Hitbox carregada com sucesso para: " .. LocalPlayer.Name)
